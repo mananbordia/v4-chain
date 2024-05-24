@@ -71,4 +71,14 @@ var (
 		ModuleName, 500, "asset transfer quantums is not positive")
 	ErrAssetTransferThroughBankNotImplemented = errorsmod.Register(
 		ModuleName, 501, "asset transfer (other than USDC) through the bank module is not implemented")
+
+	// 600 - 699: safety heap related.
+	ErrSafetyHeapEmpty                     = errorsmod.Register(ModuleName, 600, "safety heap is empty")
+	ErrSafetyHeapSubaccountNotFoundAtIndex = errorsmod.Register(
+		ModuleName,
+		601,
+		"subaccount not found at index in safety heap",
+	)
+	ErrFailedToCompareSafety             = errorsmod.Register(ModuleName, 602, "failed to compare safety")
+	ErrSafetyHeapSubaccountIndexNotFound = errorsmod.Register(ModuleName, 603, "subaccount index not found")
 )

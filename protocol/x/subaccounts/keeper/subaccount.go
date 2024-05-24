@@ -31,6 +31,8 @@ import (
 // SetSubaccount set a specific subaccount in the store from its index.
 // Note that empty subaccounts are removed from state.
 func (k Keeper) SetSubaccount(ctx sdk.Context, subaccount types.Subaccount) {
+	k.UpdateSafetyHeap(ctx, subaccount)
+
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), []byte(types.SubaccountKeyPrefix))
 	key := subaccount.Id.ToStateKey()
 
