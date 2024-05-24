@@ -7,20 +7,12 @@ import (
 	"github.com/dydxprotocol/v4-chain/protocol/x/subaccounts/types"
 )
 
-type PositionSide uint
-
-const (
-	Long PositionSide = iota
-	Short
-)
-
 // AppendToLast inserts a subaccount into the safety heap.
 func (k Keeper) AppendToLast(
 	store prefix.Store,
 	subaccountId types.SubaccountId,
 ) {
 	length := k.GetSubaccountHeapLength(store)
-
 	k.SetSubaccountAtIndex(store, subaccountId, length)
 	k.SetSubaccountHeapLength(store, length+1)
 }
@@ -28,17 +20,15 @@ func (k Keeper) AppendToLast(
 // MustRemoveLast inserts a subaccount into the safety heap.
 func (k Keeper) MustRemoveLast(
 	store prefix.Store,
-) (subaccountId types.SubaccountId) {
+) {
 	length := k.GetSubaccountHeapLength(store)
 
 	if length == 0 {
 		panic(types.ErrSafetyHeapEmpty)
 	}
 
-	subaccountId, _ = k.GetSubaccountAtIndex(store, length-1)
 	k.DeleteSubaccountAtIndex(store, length-1)
 	k.SetSubaccountHeapLength(store, length-1)
-	return subaccountId
 }
 
 // MustGetSubaccountAtIndex returns the subaccount at the given index.
@@ -85,6 +75,8 @@ func (k Keeper) SetSubaccountAtIndex(
 		key,
 		k.cdc.MustMarshal(&subaccountId),
 	)
+
+	k.SetSubaccountHeapIndex(store, subaccountId, heapIndex)
 }
 
 // DeleteSubaccountAtIndex deletes the subaccount at the given index.
@@ -92,8 +84,12 @@ func (k Keeper) DeleteSubaccountAtIndex(
 	store prefix.Store,
 	heapIndex uint32,
 ) {
+	subaccountId := k.MustGetSubaccountAtIndex(store, heapIndex)
+
 	key := lib.Uint32ToKey(heapIndex)
 	store.Delete(key)
+
+	k.DeleteSubaccountHeapIndex(store, subaccountId)
 }
 
 // MustGetSubaccountHeapIndex returns the heap index of the subaccount.
@@ -103,18 +99,30 @@ func (k Keeper) MustGetSubaccountHeapIndex(
 ) (
 	heapIndex uint32,
 ) {
+	heapIndex, found := k.GetSubaccountHeapIndex(store, subaccountId)
+	if !found {
+		panic(types.ErrSafetyHeapSubaccountIndexNotFound)
+	}
+	return heapIndex
+}
+
+// GetSubaccountHeapIndex returns the heap index of the subaccount.
+func (k Keeper) GetSubaccountHeapIndex(
+	store prefix.Store,
+	subaccountId types.SubaccountId,
+) (
+	heapIndex uint32,
+	found bool,
+) {
 	key := subaccountId.ToStateKey()
 
 	index := gogotypes.UInt32Value{Value: 0}
 	b := store.Get(key)
 
-	if b == nil {
-		panic(types.ErrSafetyHeapSubaccountNotFoundAtIndex)
+	if b != nil {
+		k.cdc.MustUnmarshal(b, &index)
 	}
-
-	k.cdc.MustUnmarshal(b, &index)
-
-	return index.Value
+	return index.Value, b != nil
 }
 
 // SetSubaccountHeapIndex sets the heap index of the subaccount.
@@ -130,6 +138,15 @@ func (k Keeper) SetSubaccountHeapIndex(
 		key,
 		k.cdc.MustMarshal(&index),
 	)
+}
+
+// DeleteSubaccountHeapIndex deletes the heap index of the subaccount.
+func (k Keeper) DeleteSubaccountHeapIndex(
+	store prefix.Store,
+	subaccountId types.SubaccountId,
+) {
+	key := subaccountId.ToStateKey()
+	store.Delete(key)
 }
 
 // GetSubaccountHeapLength returns the length of heap.

@@ -125,6 +125,8 @@ func EndBlocker(
 	// Prune any rate limiting information that is no longer relevant.
 	keeper.PruneRateLimits(ctx)
 
+	keeper.NextTickDeleverage(ctx)
+
 	// Emit relevant metrics at the end of every block.
 	metrics.SetGauge(
 		metrics.InsuranceFundBalance,
@@ -219,30 +221,38 @@ func PrepareCheckState(
 
 	// 6. Get all potentially liquidatable subaccount IDs and attempt to liquidate them.
 	liquidatableSubaccountIds := keeper.DaemonLiquidationInfo.GetLiquidatableSubaccountIds()
-	subaccountsToDeleverage, err := keeper.LiquidateSubaccountsAgainstOrderbook(ctx, liquidatableSubaccountIds)
+	_, err := keeper.LiquidateSubaccountsAgainstOrderbook(ctx, liquidatableSubaccountIds)
 	if err != nil {
 		panic(err)
 	}
+
 	// Add subaccounts with open positions in final settlement markets to the slice of subaccounts/perps
 	// to be deleveraged.
-	subaccountsToDeleverage = append(
-		subaccountsToDeleverage,
-		keeper.GetSubaccountsWithPositionsInFinalSettlementMarkets(ctx)...,
-	)
+	// subaccountsToDeleverage = append(
+	// 	subaccountsToDeleverage,
+	// 	keeper.GetSubaccountsWithPositionsInFinalSettlementMarkets(ctx)...,
+	// )
 
-	// 7. Deleverage subaccounts.
-	// TODO(CLOB-1052) - decouple steps 6 and 7 by using DaemonLiquidationInfo.NegativeTncSubaccounts
-	// as the input for this function.
-	if err := keeper.DeleverageSubaccounts(ctx, subaccountsToDeleverage); err != nil {
-		panic(err)
-	}
+	// // 7. Deleverage subaccounts.
+	// // TODO(CLOB-1052) - decouple steps 6 and 7 by using DaemonLiquidationInfo.NegativeTncSubaccounts
+	// // as the input for this function.
+	// if err := keeper.DeleverageSubaccounts(ctx, subaccountsToDeleverage); err != nil {
+	// 	panic(err)
+	// }
 
 	// 8. Gate withdrawals by inserting a zero-fill deleveraging operation into the operations queue if any
 	// of the negative TNC subaccounts still have negative TNC after liquidations and deleveraging steps.
 	negativeTncSubaccountIds := keeper.DaemonLiquidationInfo.GetNegativeTncSubaccountIds()
-	if err := keeper.GateWithdrawalsIfNegativeTncSubaccountSeen(ctx, negativeTncSubaccountIds); err != nil {
-		panic(err)
+	if len(negativeTncSubaccountIds) > 0 {
+		log.ErrorLog(
+			ctx,
+			"Found negative TNC subaccounts with next tick deleveraging",
+			"nextTickDeleverage", true,
+		)
 	}
+	// if err := keeper.GateWithdrawalsIfNegativeTncSubaccountSeen(ctx, negativeTncSubaccountIds); err != nil {
+	// 	panic(err)
+	// }
 
 	// Send all off-chain Indexer events
 	keeper.SendOffchainMessages(offchainUpdates, nil, metrics.SendPrepareCheckStateOffchainUpdates)

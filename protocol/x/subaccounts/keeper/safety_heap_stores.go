@@ -12,7 +12,7 @@ import (
 func (k Keeper) GetSafetyHeapStore(
 	ctx sdk.Context,
 	perpetualId uint32,
-	side PositionSide,
+	side types.PositionSide,
 ) prefix.Store {
 	return prefix.NewStore(
 		ctx.KVStore(k.storeKey),
@@ -23,7 +23,7 @@ func (k Keeper) GetSafetyHeapStore(
 // GetSafetyHeapKeyPrefix returns the prefix for the safety heap store.
 func (k Keeper) GetSafetyHeapKeyPrefix(
 	perpetualId uint32,
-	side PositionSide,
+	side types.PositionSide,
 ) []byte {
 	return []byte(
 		fmt.Sprintf(

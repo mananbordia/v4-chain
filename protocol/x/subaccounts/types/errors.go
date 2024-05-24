@@ -81,4 +81,5 @@ var (
 	)
 	ErrFailedToCompareSafety             = errorsmod.Register(ModuleName, 602, "failed to compare safety")
 	ErrSafetyHeapSubaccountIndexNotFound = errorsmod.Register(ModuleName, 603, "subaccount index not found")
+	ErrFailedToGetNegativeTncSubaccounts = errorsmod.Register(ModuleName, 604, "failed to get negative tnc subaccounts")
 )

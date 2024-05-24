@@ -15,6 +15,8 @@ const (
 	// Stats
 	ClobExpiredStatefulOrders                          = "clob_expired_stateful_order_removed"
 	ClobPrepareCheckStateCannotDeleverageSubaccount    = "clob_prepare_check_state_cannot_deleverage_subaccount"
+	ClobNextTickDeleveragedSubaccount                  = "clob_next_tick_deleveraged_subaccount"
+	ClobNextTickDeleveragedNegativeTncSubaccounts      = "clob_next_tick_deleveraged_negative_tnc_subaccounts"
 	ClobDeleverageSubaccountTotalQuoteQuantums         = "clob_deleverage_subaccount_total_quote_quantums"
 	ClobDeleverageSubaccount                           = "clob_deleverage_subaccount"
 	LiquidationsPlacePerpetualLiquidationQuoteQuantums = "liquidations_place_perpetual_liquidation_quote_quantums"

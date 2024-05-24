@@ -2,41 +2,135 @@ package keeper
 
 import (
 	"cosmossdk.io/store/prefix"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/dydxprotocol/v4-chain/protocol/lib"
 	"github.com/dydxprotocol/v4-chain/protocol/x/subaccounts/types"
 )
 
-func (k Keeper) UpdateSafetyHeap(
+// TODO: optimize this
+func (k Keeper) GetSubaccountsWithOpenPositionsOnSide(
 	ctx sdk.Context,
-	subaccount types.Subaccount,
+	perpetualId uint32,
+	side types.PositionSide,
+) []types.SubaccountId {
+	store := k.GetSafetyHeapStore(ctx, perpetualId, side)
+
+	iterator := storetypes.KVStoreReversePrefixIterator(store, []byte{})
+	defer iterator.Close()
+
+	result := make([]types.SubaccountId, 0)
+	for ; iterator.Valid(); iterator.Next() {
+		var val types.SubaccountId
+		k.cdc.MustUnmarshal(iterator.Value(), &val)
+		result = append(result, val)
+	}
+	return result
+}
+
+func (k Keeper) GetAllNegativeTncSubaccounts(
+	ctx sdk.Context,
+) []types.SubaccountId {
+	perpetuals := k.perpetualsKeeper.GetAllPerpetuals(ctx)
+	negativeTncSubaccounts := make(map[types.SubaccountId]bool)
+
+	for _, perpetual := range perpetuals {
+		for _, side := range []types.PositionSide{types.Long, types.Short} {
+			store := k.GetSafetyHeapStore(ctx, perpetual.GetId(), side)
+			subaccounts := k.GetNegativeTncSubaccounts(ctx, store, 0)
+
+			for _, subaccountId := range subaccounts {
+				negativeTncSubaccounts[subaccountId] = true
+			}
+		}
+	}
+
+	sortedSubaccountIds := lib.GetSortedKeys[types.SortedSubaccountIds](negativeTncSubaccounts)
+	return sortedSubaccountIds
+}
+
+func (k Keeper) GetNegativeTncSubaccounts(
+	ctx sdk.Context,
+	store prefix.Store,
+	index uint32,
+) []types.SubaccountId {
+	result := []types.SubaccountId{}
+
+	subaccountId, found := k.GetSubaccountAtIndex(store, index)
+	if !found {
+		return result
+	}
+
+	settledUpdates, _, err := k.getSettledUpdates(
+		ctx,
+		[]types.Update{
+			{
+				SubaccountId: subaccountId,
+			},
+		},
+		true,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	tnc, _, _, err :=
+		k.internalGetNetCollateralAndMarginRequirements(
+			ctx,
+			settledUpdates[0],
+		)
+	if err != nil {
+		panic(err)
+	}
+
+	if tnc.Sign() == -1 {
+		result = append(result, subaccountId)
+
+		// Recursively get the negative TNC subaccounts for left and right children.
+		result = append(result, k.GetNegativeTncSubaccounts(ctx, store, 2*index+1)...)
+		result = append(result, k.GetNegativeTncSubaccounts(ctx, store, 2*index+2)...)
+	}
+	return result
+}
+
+func (k Keeper) RemoveSubaccountFromSafetyHeap(
+	ctx sdk.Context,
+	subaccountId types.SubaccountId,
 ) {
-	subaccountId := subaccount.Id
-	oldSubaccount := k.GetSubaccount(ctx, *subaccountId)
+	oldSubaccount := k.GetSubaccount(ctx, subaccountId)
 
 	// TODO: optimize this
 	for _, position := range oldSubaccount.PerpetualPositions {
-		var side PositionSide
+		var side types.PositionSide
 		if position.Quantums.BigInt().Sign() == 1 {
-			side = Long
+			side = types.Long
 		} else {
-			side = Short
+			side = types.Short
 		}
 
 		store := k.GetSafetyHeapStore(ctx, position.PerpetualId, side)
-		index := k.MustGetSubaccountHeapIndex(store, *subaccountId)
-		_, _ = k.RemoveElementAtIndex(ctx, store, index)
+		index := k.MustGetSubaccountHeapIndex(store, subaccountId)
+		k.MustRemoveElementAtIndex(ctx, store, index)
 	}
+}
 
+func (k Keeper) AddSubaccountToSafetyHeap(
+	ctx sdk.Context,
+	subaccountId types.SubaccountId,
+) {
+	subaccount := k.GetSubaccount(ctx, subaccountId)
+
+	// TODO: optimize this
 	for _, position := range subaccount.PerpetualPositions {
-		var side PositionSide
+		var side types.PositionSide
 		if position.Quantums.BigInt().Sign() == 1 {
-			side = Long
+			side = types.Long
 		} else {
-			side = Short
+			side = types.Short
 		}
 
 		store := k.GetSafetyHeapStore(ctx, position.PerpetualId, side)
-		k.Insert(ctx, store, *subaccountId)
+		k.Insert(ctx, store, subaccountId)
 	}
 }
 
@@ -46,46 +140,35 @@ func (k Keeper) Insert(
 	subaccountId types.SubaccountId,
 ) {
 	length := k.GetSubaccountHeapLength(store)
-
-	k.SetSubaccountAtIndex(store, subaccountId, length)
-	k.SetSubaccountHeapLength(store, length+1)
-
+	k.AppendToLast(store, subaccountId)
 	k.HeapifyUp(ctx, store, length)
 }
 
-func (k Keeper) RemoveElementAtIndex(
+func (k Keeper) MustRemoveElementAtIndex(
 	ctx sdk.Context,
 	store prefix.Store,
 	index uint32,
-) (
-	subaccountId types.SubaccountId,
-	exists bool,
 ) {
 	length := k.GetSubaccountHeapLength(store)
 	if index >= length {
-		return types.SubaccountId{}, false
+		panic(types.ErrSafetyHeapSubaccountNotFoundAtIndex)
+	}
+
+	if index == length-1 {
+		k.MustRemoveLast(store)
+		return
 	}
 
 	// Swap the min element with the last element.
 	k.Swap(store, index, length-1)
 
 	// Remove the min element.
-	minSubaccount := k.MustRemoveLast(store)
+	k.MustRemoveLast(store)
 
 	// Heapify down the root element.
+	// Only do this when we are not removing the last element.
 	k.HeapifyDown(ctx, store, index)
-
-	return minSubaccount, true
-}
-
-func (k Keeper) ExtractMin(
-	ctx sdk.Context,
-	store prefix.Store,
-) (
-	subaccountId types.SubaccountId,
-	exists bool,
-) {
-	return k.RemoveElementAtIndex(ctx, store, 0)
+	k.HeapifyUp(ctx, store, index)
 }
 
 func (k Keeper) HeapifyUp(
@@ -109,16 +192,15 @@ func (k Keeper) HeapifyDown(
 	store prefix.Store,
 	index uint32,
 ) {
-	last := k.GetSubaccountHeapLength(store) - 1
+	length := k.GetSubaccountHeapLength(store)
 	leftIndex, rightIndex := 2*index+1, 2*index+2
-
-	if rightIndex <= last && k.Less(ctx, store, rightIndex, leftIndex) {
+	if rightIndex < length && k.Less(ctx, store, rightIndex, leftIndex) {
 		// Compare the current node with the right child.
 		if k.Less(ctx, store, rightIndex, index) {
 			k.Swap(store, index, rightIndex)
 			k.HeapifyDown(ctx, store, rightIndex)
 		}
-	} else if leftIndex <= last {
+	} else if leftIndex < length {
 		// Compare the current node with the left child.
 		if k.Less(ctx, store, leftIndex, index) {
 			k.Swap(store, index, leftIndex)
@@ -157,7 +239,7 @@ func (k Keeper) Less(
 		true,
 	)
 	if err != nil {
-		panic(types.ErrFailedToCompareSafety)
+		panic(err)
 	}
 
 	firstTnc, _, firstMmr, err :=
@@ -166,7 +248,7 @@ func (k Keeper) Less(
 			settledUpdates[0],
 		)
 	if err != nil {
-		panic(types.ErrFailedToCompareSafety)
+		panic(err)
 	}
 
 	secondTnc, _, secondMmr, err :=
@@ -175,7 +257,7 @@ func (k Keeper) Less(
 			settledUpdates[1],
 		)
 	if err != nil {
-		panic(types.ErrFailedToCompareSafety)
+		panic(err)
 	}
 
 	// first tnc / first mmr < second tnc / second mmr
