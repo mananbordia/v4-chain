@@ -18,7 +18,7 @@ var (
 	TestVolatileExchangeParams = VolatileExchangeParams{
 		AveragePrice: 100,
 		Amplitude:    0.95,
-		Frequency:    1,
+		Frequency:    24,
 	}
 	TestVolatileExchangeDetails = types.ExchangeQueryDetails{
 		Exchange:      exchange_common.EXCHANGE_ID_TEST_VOLATILE_EXCHANGE,

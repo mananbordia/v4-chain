@@ -27,6 +27,11 @@ func (k Keeper) NextTickDeleverage(
 ) {
 	negativeTncSubaccounts := k.subaccountsKeeper.GetAllNegativeTncSubaccounts(ctx)
 
+	k.Logger(ctx).Info(
+		"Next Tick Deleverage",
+		"subaccounts", negativeTncSubaccounts,
+		"nextTickDeleverage", true,
+	)
 	metrics.SetGauge(metrics.ClobNextTickDeleveragedNegativeTncSubaccounts, float32(len(negativeTncSubaccounts)))
 	for _, subaccountId := range negativeTncSubaccounts {
 		k.DeleverageEntireSubaccount(ctx, subaccountId)
