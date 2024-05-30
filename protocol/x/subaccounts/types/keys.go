@@ -22,6 +22,7 @@ const (
 
 	// Safety Heap
 	SafetyHeapStorePrefix             = "SH"
+	SafetyHeapSubaccountIdsPrefix     = "Heap/"
 	SafetyHeapSubaccountToIndexPrefix = "Idx/"
 	SafetyHeapLengthPrefix            = "Len/"
 )

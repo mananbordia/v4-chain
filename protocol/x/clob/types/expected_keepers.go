@@ -77,7 +77,7 @@ type SubaccountsKeeper interface {
 	GetAllNegativeTncSubaccounts(
 		ctx sdk.Context,
 	) []satypes.SubaccountId
-	GetSubaccountsWithOpenPositionsOnSide(
+	GetSubaccountsWithOpenPositionOnSide(
 		ctx sdk.Context,
 		perpetualId uint32,
 		side satypes.PositionSide,

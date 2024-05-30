@@ -346,7 +346,7 @@ func (k Keeper) OffsetSubaccountPerpetualPositionV2(
 	} else {
 		offsettingSide = satypes.Long
 	}
-	subaccountsWithOpenPositions := k.subaccountsKeeper.GetSubaccountsWithOpenPositionsOnSide(
+	subaccountsWithOpenPositions := k.subaccountsKeeper.GetSubaccountsWithOpenPositionOnSide(
 		ctx,
 		perpetualId,
 		offsettingSide,

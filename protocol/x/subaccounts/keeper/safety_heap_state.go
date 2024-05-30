@@ -53,9 +53,13 @@ func (k Keeper) GetSubaccountAtIndex(
 	subaccountId types.SubaccountId,
 	found bool,
 ) {
+	prefix := prefix.NewStore(
+		store,
+		[]byte(types.SafetyHeapSubaccountIdsPrefix),
+	)
 	key := lib.Uint32ToKey(heapIndex)
 
-	b := store.Get(key)
+	b := prefix.Get(key)
 
 	if b != nil {
 		k.cdc.MustUnmarshal(b, &subaccountId)
@@ -69,13 +73,16 @@ func (k Keeper) SetSubaccountAtIndex(
 	subaccountId types.SubaccountId,
 	heapIndex uint32,
 ) {
+	prefix := prefix.NewStore(
+		store,
+		[]byte(types.SafetyHeapSubaccountIdsPrefix),
+	)
 	key := lib.Uint32ToKey(heapIndex)
 
-	store.Set(
+	prefix.Set(
 		key,
 		k.cdc.MustMarshal(&subaccountId),
 	)
-
 	k.SetSubaccountHeapIndex(store, subaccountId, heapIndex)
 }
 
@@ -84,10 +91,14 @@ func (k Keeper) DeleteSubaccountAtIndex(
 	store prefix.Store,
 	heapIndex uint32,
 ) {
+	prefix := prefix.NewStore(
+		store,
+		[]byte(types.SafetyHeapSubaccountIdsPrefix),
+	)
 	subaccountId := k.MustGetSubaccountAtIndex(store, heapIndex)
 
 	key := lib.Uint32ToKey(heapIndex)
-	store.Delete(key)
+	prefix.Delete(key)
 
 	k.DeleteSubaccountHeapIndex(store, subaccountId)
 }

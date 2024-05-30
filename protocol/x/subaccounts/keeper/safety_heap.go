@@ -9,14 +9,17 @@ import (
 )
 
 // TODO: optimize this
-func (k Keeper) GetSubaccountsWithOpenPositionsOnSide(
+func (k Keeper) GetSubaccountsWithOpenPositionOnSide(
 	ctx sdk.Context,
 	perpetualId uint32,
 	side types.PositionSide,
 ) []types.SubaccountId {
-	store := k.GetSafetyHeapStore(ctx, perpetualId, side)
+	prefix := prefix.NewStore(
+		k.GetSafetyHeapStore(ctx, perpetualId, side),
+		[]byte(types.SafetyHeapSubaccountIdsPrefix),
+	)
 
-	iterator := storetypes.KVStoreReversePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStoreReversePrefixIterator(prefix, []byte{})
 	defer iterator.Close()
 
 	result := make([]types.SubaccountId, 0)
