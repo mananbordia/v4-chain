@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 	"time"
 
@@ -125,6 +126,7 @@ func (c *Client) FetchApplicationStateAtBlockHeight(
 
 	// Execute all queries at the given block height.
 	queryCtx := newContextWithQueryBlockHeight(ctx, blockHeight)
+	fmt.Printf("Fetching application state at block height %d\n", blockHeight)
 
 	// Subaccounts
 	subaccounts, err = c.GetAllSubaccounts(queryCtx, liqFlags.QueryPageLimit)
