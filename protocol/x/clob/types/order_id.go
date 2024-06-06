@@ -6,6 +6,7 @@ import (
 
 	errorsmod "cosmossdk.io/errors"
 
+	"github.com/dydxprotocol/v4-chain/protocol/lib"
 	"github.com/dydxprotocol/v4-chain/protocol/lib/metrics"
 )
 
@@ -162,12 +163,8 @@ func (s SortedOrders) Less(i, j int) bool {
 // `Subaccount` number, followed by `ClientId` of the order, followed by `OrderFlags`,
 // and finally by `ClobPairId` of the order.
 func MustSortAndHaveNoDuplicates(orderIds []OrderId) {
-	orderIdSet := make(map[OrderId]struct{}, len(orderIds))
-	for _, orderId := range orderIds {
-		if _, exists := orderIdSet[orderId]; exists {
-			panic(fmt.Errorf("cannot sort orders with duplicate order id %+v", orderId))
-		}
-		orderIdSet[orderId] = struct{}{}
+	if lib.ContainsDuplicates(orderIds) {
+		panic(fmt.Errorf("cannot sort orders with duplicate order id"))
 	}
 	sort.Sort(SortedOrders(orderIds))
 }
