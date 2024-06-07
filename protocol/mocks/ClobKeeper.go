@@ -1000,6 +1000,24 @@ func (_m *ClobKeeper) PlaceStatefulOrder(ctx types.Context, msg *clobtypes.MsgPl
 	return r0
 }
 
+// PostTimestamp provides a mock function with given fields: ctx, accountNumber, sequence
+func (_m *ClobKeeper) PostTimestamp(ctx types.Context, accountNumber uint64, sequence uint64) bool {
+	ret := _m.Called(ctx, accountNumber, sequence)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PostTimestamp")
+	}
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(types.Context, uint64, uint64) bool); ok {
+		r0 = rf(ctx, accountNumber, sequence)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}
+
 // ProcessProposerOperations provides a mock function with given fields: ctx, operations
 func (_m *ClobKeeper) ProcessProposerOperations(ctx types.Context, operations []clobtypes.OperationRaw) error {
 	ret := _m.Called(ctx, operations)

@@ -12,6 +12,7 @@ import (
 	sdkante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/dydxprotocol/v4-chain/protocol/lib/metrics"
+	clobtypes "github.com/dydxprotocol/v4-chain/protocol/x/clob/types"
 	gometrics "github.com/hashicorp/go-metrics"
 	"google.golang.org/protobuf/types/known/anypb"
 )
@@ -23,15 +24,18 @@ import (
 // CONTRACT: Tx must implement SigVerifiableTx interface
 type SigVerificationDecorator struct {
 	ak              sdkante.AccountKeeper
+	ck              clobtypes.ClobKeeper
 	signModeHandler *txsigning.HandlerMap
 }
 
 func NewSigVerificationDecorator(
 	ak sdkante.AccountKeeper,
+	ck clobtypes.ClobKeeper,
 	signModeHandler *txsigning.HandlerMap,
 ) SigVerificationDecorator {
 	return SigVerificationDecorator{
 		ak:              ak,
+		ck:              ck,
 		signModeHandler: signModeHandler,
 	}
 }
@@ -72,7 +76,7 @@ func (svd SigVerificationDecorator) AnteHandle(
 
 	// Sequence number validation can be skipped if the given transaction consists of
 	// only messages that use `GoodTilBlock` for replay protection.
-	skipSequenceValidation := ShouldSkipSequenceValidation(tx.GetMsgs())
+	seqValType := GetSequenceValidationType(tx.GetMsgs())
 
 	for i, sig := range sigs {
 		acc, err := sdkante.GetSignerAcc(ctx, svd.ak, signers[i])
@@ -86,10 +90,18 @@ func (svd SigVerificationDecorator) AnteHandle(
 			return ctx, errorsmod.Wrap(sdkerrors.ErrInvalidPubKey, "pubkey on account is not set")
 		}
 
+		// retrieve signer data
+		genesis := ctx.BlockHeight() == 0
+		chainID := ctx.ChainID()
+		var accNum uint64
+		if !genesis {
+			accNum = acc.GetAccountNumber()
+		}
+
 		// Check account sequence number.
 		// Skip individual sequence number validation since this transaction use
 		// `GoodTilBlock` for replay protection.
-		if !skipSequenceValidation && sig.Sequence != acc.GetSequence() {
+		if (seqValType == SeqVal_Default) && (sig.Sequence != acc.GetSequence()) {
 			labels := make([]gometrics.Label, 0)
 			if len(tx.GetMsgs()) > 0 {
 				labels = append(
@@ -107,13 +119,18 @@ func (svd SigVerificationDecorator) AnteHandle(
 				"account sequence mismatch, expected %d, got %d", acc.GetSequence(), sig.Sequence,
 			)
 		}
-
-		// retrieve signer data
-		genesis := ctx.BlockHeight() == 0
-		chainID := ctx.ChainID()
-		var accNum uint64
-		if !genesis {
-			accNum = acc.GetAccountNumber()
+		if seqValType == SeqVal_XOperate {
+			midSeq := uint64(ctx.BlockTime().Unix())
+			if sig.Sequence > midSeq+20_000 {
+				return ctx, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "timestamp too far in the future")
+			}
+			if sig.Sequence < midSeq-20_000 {
+				return ctx, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "timestamp too far in the past")
+			}
+			ok := svd.ck.PostTimestamp(ctx, accNum, sig.Sequence)
+			if !ok {
+				return ctx, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "cannot post timestamp")
+			}
 		}
 
 		// no need to verify signatures on recheck tx

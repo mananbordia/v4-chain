@@ -1029,6 +1029,7 @@ func New(
 			delaymsgmoduletypes.ModuleAddress.String(),
 		},
 		memClob,
+		app.AccountKeeper,
 		app.SubaccountsKeeper,
 		app.AssetsKeeper,
 		app.BlockTimeKeeper,

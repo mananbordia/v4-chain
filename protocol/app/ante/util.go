@@ -5,16 +5,16 @@ import (
 	clobtypes "github.com/dydxprotocol/v4-chain/protocol/x/clob/types"
 )
 
-// ShouldSkipSequenceValidation returns whether sequence validation can be skipped for a given list of messages.
-// If the transaction consists of only messages which use `GoodTilBlock` to prevent transaction replay,
-// the sequence numbers for this transaction won't get incremented and verified.
-//
-// Important:
-// ALL messages from a transaction must use `GoodTilBlock` in order to skip sequence number validation.
-// Otherwise, attackers can create transactions with a single `GoodTilBlock` message, followed by any number of messages
-// that they wish to be replayed which normally use sequence numbers. This would cause the sequence validation
-// to be skipped for all of those messages and this transaction could be replayed.
-func ShouldSkipSequenceValidation(msgs []sdk.Msg) (shouldSkipValidation bool) {
+const (
+	// Default is the default sequence validation type.
+	SeqVal_Default uint64 = iota
+	// GoodTilBlock is the sequence validation type for messages that use `GoodTilBlock`.
+	SeqVal_GoodTilBlock
+	// XOperate is the sequence validation type for `MsgXOperate`.
+	SeqVal_XOperate
+)
+
+func GetSequenceValidationType(msgs []sdk.Msg) (version uint64) {
 	for _, msg := range msgs {
 		switch typedMsg := msg.(type) {
 		case
@@ -22,7 +22,7 @@ func ShouldSkipSequenceValidation(msgs []sdk.Msg) (shouldSkipValidation bool) {
 			// Stateful orders need to use sequence numbers for replay prevention.
 			orderId := typedMsg.GetOrder().OrderId
 			if orderId.IsStatefulOrder() {
-				return false
+				return SeqVal_Default
 			}
 			// This is a short term order, continue to check the next message.
 			continue
@@ -30,15 +30,18 @@ func ShouldSkipSequenceValidation(msgs []sdk.Msg) (shouldSkipValidation bool) {
 			*clobtypes.MsgCancelOrder:
 			orderId := typedMsg.GetOrderId()
 			if orderId.IsStatefulOrder() {
-				return false
+				return SeqVal_Default
 			}
 			// This is a `GoodTilBlock` message, continue to check the next message.
 			continue
+		case
+			*clobtypes.MsgXOperate:
+			return SeqVal_XOperate
 		default:
 			// Early return for messages that require sequence number validation.
-			return false
+			return SeqVal_Default
 		}
 	}
 	// All messages use `GoodTilBlock`.
-	return true
+	return SeqVal_GoodTilBlock
 }

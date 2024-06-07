@@ -159,4 +159,6 @@ type ClobKeeper interface {
 		snapshot bool,
 	)
 	MigratePruneableOrders(ctx sdk.Context)
+
+	PostTimestamp(ctx sdk.Context, accountNumber uint64, sequence uint64) bool
 }

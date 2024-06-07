@@ -220,6 +220,11 @@ var (
 		47,
 		"CLOB has not been initialized",
 	)
+	ErrOcoIsSameAsOrder = errorsmod.Register(
+		ModuleName,
+		48,
+		"OCO order is the same as the order",
+	)
 
 	// Liquidations errors.
 	ErrInvalidLiquidationsConfig = errorsmod.Register(

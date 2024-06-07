@@ -85,7 +85,11 @@ func TestSigVerification(t *testing.T) {
 		txConfigOpts,
 	)
 	require.NoError(t, err)
-	svd := customante.NewSigVerificationDecorator(suite.AccountKeeper, anteTxConfig.SignModeHandler())
+	svd := customante.NewSigVerificationDecorator(
+		suite.AccountKeeper,
+		suite.ClobKeeper,
+		anteTxConfig.SignModeHandler(),
+	)
 	antehandler := sdk.ChainAnteDecorators(spkd, svd)
 	defaultSignMode, err := authsign.APISignModeToInternal(anteTxConfig.SignModeHandler().DefaultMode())
 	require.NoError(t, err)
@@ -321,7 +325,11 @@ func runSigDecorators(t *testing.T, params types.Params, _ bool, privs ...crypto
 
 	spkd := sdkante.NewSetPubKeyDecorator(suite.AccountKeeper)
 	svgc := sdkante.NewSigGasConsumeDecorator(suite.AccountKeeper, sdkante.DefaultSigVerificationGasConsumer)
-	svd := customante.NewSigVerificationDecorator(suite.AccountKeeper, suite.ClientCtx.TxConfig.SignModeHandler())
+	svd := customante.NewSigVerificationDecorator(
+		suite.AccountKeeper,
+		suite.ClobKeeper,
+		suite.ClientCtx.TxConfig.SignModeHandler(),
+	)
 	antehandler := sdk.ChainAnteDecorators(spkd, svgc, svd)
 
 	txBytes, err := suite.ClientCtx.TxConfig.TxEncoder()(tx)
