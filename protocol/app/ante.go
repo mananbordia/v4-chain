@@ -110,7 +110,6 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 		sigGasConsume: ante.NewSigGasConsumeDecorator(options.AccountKeeper, options.SigGasConsumer),
 		clobRateLimit: clobante.NewRateLimitDecorator(options.ClobKeeper),
 		clob:          clobante.NewClobDecorator(options.ClobKeeper),
-		clobTimestamp: clobante.NewTimestampDecorator(options.ClobKeeper),
 	}
 	return h.AnteHandle, nil
 }
@@ -140,7 +139,6 @@ type lockingAnteHandler struct {
 	sigGasConsume            ante.SigGasConsumeDecorator
 	clobRateLimit            clobante.ClobRateLimitDecorator
 	clob                     clobante.ClobDecorator
-	clobTimestamp            clobante.ClobTimestampDecorator
 }
 
 func (h *lockingAnteHandler) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool) (sdk.Context, error) {
@@ -236,11 +234,6 @@ func (h *lockingAnteHandler) clobAnteHandle(ctx sdk.Context, tx sdk.Tx, simulate
 	}
 	if !isShortTerm && !isXOperate {
 		if ctx, err = h.incrementSequence.AnteHandle(ctx, tx, simulate, noOpAnteHandle); err != nil {
-			return ctx, err
-		}
-	}
-	if isXOperate {
-		if ctx, err = h.clobTimestamp.AnteHandle(ctx, tx, simulate, noOpAnteHandle); err != nil {
 			return ctx, err
 		}
 	}
