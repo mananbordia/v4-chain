@@ -12,7 +12,6 @@ import (
 	sdkante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/dydxprotocol/v4-chain/protocol/lib/metrics"
-	clobtypes "github.com/dydxprotocol/v4-chain/protocol/x/clob/types"
 	gometrics "github.com/hashicorp/go-metrics"
 	"google.golang.org/protobuf/types/known/anypb"
 )
@@ -24,18 +23,15 @@ import (
 // CONTRACT: Tx must implement SigVerifiableTx interface
 type SigVerificationDecorator struct {
 	ak              sdkante.AccountKeeper
-	ck              clobtypes.ClobKeeper
 	signModeHandler *txsigning.HandlerMap
 }
 
 func NewSigVerificationDecorator(
 	ak sdkante.AccountKeeper,
-	ck clobtypes.ClobKeeper,
 	signModeHandler *txsigning.HandlerMap,
 ) SigVerificationDecorator {
 	return SigVerificationDecorator{
 		ak:              ak,
-		ck:              ck,
 		signModeHandler: signModeHandler,
 	}
 }
@@ -79,7 +75,8 @@ func (svd SigVerificationDecorator) AnteHandle(
 	seqValType := GetSequenceValidationType(tx.GetMsgs())
 
 	for i, sig := range sigs {
-		acc, err := sdkante.GetSignerAcc(ctx, svd.ak, signers[i])
+		signer := signers[i]
+		acc, err := sdkante.GetSignerAcc(ctx, svd.ak, signer)
 		if err != nil {
 			return ctx, err
 		}
@@ -98,39 +95,48 @@ func (svd SigVerificationDecorator) AnteHandle(
 			accNum = acc.GetAccountNumber()
 		}
 
-		// Check account sequence number.
-		// Skip individual sequence number validation since this transaction use
-		// `GoodTilBlock` for replay protection.
-		if (seqValType == SeqVal_Default) && (sig.Sequence != acc.GetSequence()) {
-			labels := make([]gometrics.Label, 0)
-			if len(tx.GetMsgs()) > 0 {
-				labels = append(
+		switch seqValType {
+		case SeqVal_Default:
+			// Verify the sequence number.
+			if sig.Sequence != acc.GetSequence() {
+				labels := make([]gometrics.Label, 0)
+				if len(tx.GetMsgs()) > 0 {
+					labels = append(
+						labels,
+						metrics.GetLabelForStringValue(metrics.MessageType, fmt.Sprintf("%T", tx.GetMsgs()[0])),
+					)
+				}
+				telemetry.IncrCounterWithLabels(
+					[]string{metrics.SequenceNumber, metrics.Invalid, metrics.Count},
+					1,
 					labels,
-					metrics.GetLabelForStringValue(metrics.MessageType, fmt.Sprintf("%T", tx.GetMsgs()[0])),
+				)
+				return ctx, errorsmod.Wrapf(
+					sdkerrors.ErrWrongSequence,
+					"account sequence mismatch, expected %d, got %d", acc.GetSequence(), sig.Sequence,
 				)
 			}
-			telemetry.IncrCounterWithLabels(
-				[]string{metrics.SequenceNumber, metrics.Invalid, metrics.Count},
-				1,
-				labels,
-			)
-			return ctx, errorsmod.Wrapf(
-				sdkerrors.ErrWrongSequence,
-				"account sequence mismatch, expected %d, got %d", acc.GetSequence(), sig.Sequence,
-			)
-		}
-		if seqValType == SeqVal_XOperate {
+			// Increment the sequence number.
+			if err := acc.SetSequence(acc.GetSequence() + 1); err != nil {
+				panic(err)
+			}
+			svd.ak.SetAccount(ctx, acc)
+		case SeqVal_GoodTilBlock:
+			// Ignore
+		case SeqVal_XOperate:
 			midSeq := uint64(ctx.BlockTime().Unix())
-			if sig.Sequence > midSeq+20_000 {
+			if sig.Sequence > midSeq+60_000 {
 				return ctx, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "timestamp too far in the future")
 			}
-			if sig.Sequence < midSeq-20_000 {
+			if sig.Sequence < midSeq-60_000 {
 				return ctx, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "timestamp too far in the past")
 			}
-			ok := svd.ck.PostTimestamp(ctx, accNum, sig.Sequence)
-			if !ok {
-				return ctx, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "cannot post timestamp")
+			err := svd.ak.AddNonce(ctx, signer, sig.Sequence)
+			if err != nil {
+				return ctx, err
 			}
+		default:
+			return ctx, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "unknown sequence validation type")
 		}
 
 		// no need to verify signatures on recheck tx
