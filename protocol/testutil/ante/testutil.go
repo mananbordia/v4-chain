@@ -13,7 +13,6 @@ import (
 	txtestutil "github.com/cosmos/cosmos-sdk/x/auth/tx/testutil"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	v4module "github.com/dydxprotocol/v4-chain/protocol/app/module"
-	clobkeeper "github.com/dydxprotocol/v4-chain/protocol/x/clob/keeper"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -50,7 +49,6 @@ type AnteTestSuite struct {
 	ClientCtx      client.Context
 	TxBuilder      client.TxBuilder
 	AccountKeeper  keeper.AccountKeeper
-	ClobKeeper     *clobkeeper.Keeper
 	BankKeeper     *authtestutil.MockBankKeeper
 	TxBankKeeper   *txtestutil.MockBankKeeper
 	FeeGrantKeeper *antetestutil.MockFeegrantKeeper

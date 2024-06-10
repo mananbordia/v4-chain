@@ -10,89 +10,89 @@ import (
 )
 
 type ValidationUtilTestCase struct {
-	msgs     []sdk.Msg
-	expected uint64
+	msgs                 []sdk.Msg
+	shouldSkipValidation bool
 }
 
-func TestGetSequenceValidationType(t *testing.T) {
+func TestSkipSequenceValidation(t *testing.T) {
 	testCases := map[string]ValidationUtilTestCase{
 		"single place order message": {
 			msgs: []sdk.Msg{
 				constants.Msg_PlaceOrder,
 			},
-			expected: ante.SeqVal_GoodTilBlock,
+			shouldSkipValidation: true,
 		},
 		"single cancel order message": {
 			msgs: []sdk.Msg{
 				constants.Msg_CancelOrder,
 			},
-			expected: ante.SeqVal_GoodTilBlock,
+			shouldSkipValidation: true,
 		},
 		"single transfer message": {
 			msgs: []sdk.Msg{
 				constants.Msg_Transfer,
 			},
-			expected: ante.SeqVal_Default,
+			shouldSkipValidation: false,
 		},
 		"single send message": {
 			msgs: []sdk.Msg{
 				constants.Msg_Send,
 			},
-			expected: ante.SeqVal_Default,
+			shouldSkipValidation: false,
 		},
 		"single long term order": {
 			msgs: []sdk.Msg{
 				constants.Msg_PlaceOrder_LongTerm,
 			},
-			expected: ante.SeqVal_Default,
+			shouldSkipValidation: false,
 		},
 		"single long term cancel": {
 			msgs: []sdk.Msg{
 				constants.Msg_CancelOrder_LongTerm,
 			},
-			expected: ante.SeqVal_Default,
+			shouldSkipValidation: false,
 		},
 		"single conditional order": {
 			msgs: []sdk.Msg{
 				constants.Msg_PlaceOrder_Conditional,
 			},
-			expected: ante.SeqVal_Default,
+			shouldSkipValidation: false,
 		},
 		"multiple GTB messages": {
 			msgs: []sdk.Msg{
 				constants.Msg_PlaceOrder,
 				constants.Msg_CancelOrder,
 			},
-			expected: ante.SeqVal_GoodTilBlock,
+			shouldSkipValidation: true,
 		},
 		"mix of GTB messages and non-GTB messages": {
 			msgs: []sdk.Msg{
 				constants.Msg_Transfer,
 				constants.Msg_Send,
 			},
-			expected: ante.SeqVal_Default,
+			shouldSkipValidation: false,
 		},
 		"mix of long term orders and short term orders": {
 			msgs: []sdk.Msg{
 				constants.Msg_PlaceOrder,
 				constants.Msg_PlaceOrder_LongTerm,
 			},
-			expected: ante.SeqVal_Default,
+			shouldSkipValidation: false,
 		},
 		"mix of conditional orders and short term orders": {
 			msgs: []sdk.Msg{
 				constants.Msg_PlaceOrder,
 				constants.Msg_PlaceOrder_Conditional,
 			},
-			expected: ante.SeqVal_Default,
+			shouldSkipValidation: false,
 		},
 	}
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
 			require.Equal(
 				t,
-				tc.expected,
-				ante.GetSequenceValidationType(tc.msgs),
+				tc.shouldSkipValidation,
+				ante.ShouldSkipSequenceValidation(tc.msgs),
 			)
 		})
 	}

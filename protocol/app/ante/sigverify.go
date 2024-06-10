@@ -16,6 +16,14 @@ import (
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
+// This is the maximum acceptable sequence number.
+// Any transactions with a sequence number higher than this will be treated as a nonce timestamp in epoch milliseconds.
+// This allows for over 1 trillion sequence numbers. Nonce timestamps must be later than sometime in the year 2004.
+const sequence_cutoff = uint64(1) << 40
+
+// This is the maximum acceptable difference between the sequence number and the current block time in milliseconds.
+const nonce_timestamp_tolerance_ms = uint64(60_000)
+
 // SigVerificationDecorator verifies all signatures for a tx and return an error if any are invalid. Note,
 // the SigVerificationDecorator will not check signatures on ReCheck.
 //
@@ -72,7 +80,7 @@ func (svd SigVerificationDecorator) AnteHandle(
 
 	// Sequence number validation can be skipped if the given transaction consists of
 	// only messages that use `GoodTilBlock` for replay protection.
-	seqValType := GetSequenceValidationType(tx.GetMsgs())
+	skipSequenceValidation := ShouldSkipSequenceValidation(tx.GetMsgs())
 
 	for i, sig := range sigs {
 		signer := signers[i]
@@ -95,48 +103,53 @@ func (svd SigVerificationDecorator) AnteHandle(
 			accNum = acc.GetAccountNumber()
 		}
 
-		switch seqValType {
-		case SeqVal_Default:
-			// Verify the sequence number.
-			if sig.Sequence != acc.GetSequence() {
-				labels := make([]gometrics.Label, 0)
-				if len(tx.GetMsgs()) > 0 {
-					labels = append(
+		// Sequence validation and storage must be performed.
+		// The sequence number is used as a nonce for replay protection.
+		// There are two different modes depending on whether the provided sequence number is
+		// less-than or greater-than the sequence cutoff:
+		//  - Less-than: it is treated as an incrementally increasing number.
+		//  - Greater-than: it is treated as a nonce timestamp in epoch milliseconds.
+		if !skipSequenceValidation {
+			sequenceIsSequential := sig.Sequence <= sequence_cutoff
+			if sequenceIsSequential {
+				// Treat sequence number as an incrementally increasing number.
+				if sig.Sequence != acc.GetSequence() {
+					labels := make([]gometrics.Label, 0)
+					if len(tx.GetMsgs()) > 0 {
+						labels = append(
+							labels,
+							metrics.GetLabelForStringValue(metrics.MessageType, fmt.Sprintf("%T", tx.GetMsgs()[0])),
+						)
+					}
+					telemetry.IncrCounterWithLabels(
+						[]string{metrics.SequenceNumber, metrics.Invalid, metrics.Count},
+						1,
 						labels,
-						metrics.GetLabelForStringValue(metrics.MessageType, fmt.Sprintf("%T", tx.GetMsgs()[0])),
+					)
+					return ctx, errorsmod.Wrapf(
+						sdkerrors.ErrWrongSequence,
+						"account sequence mismatch, expected %d, got %d", acc.GetSequence(), sig.Sequence,
 					)
 				}
-				telemetry.IncrCounterWithLabels(
-					[]string{metrics.SequenceNumber, metrics.Invalid, metrics.Count},
-					1,
-					labels,
-				)
-				return ctx, errorsmod.Wrapf(
-					sdkerrors.ErrWrongSequence,
-					"account sequence mismatch, expected %d, got %d", acc.GetSequence(), sig.Sequence,
-				)
+				// Increment the sequence number.
+				if err := acc.SetSequence(acc.GetSequence() + 1); err != nil {
+					panic(err)
+				}
+				svd.ak.SetAccount(ctx, acc)
+			} else {
+				// Treat sequence number as a nonce timestamp.
+				midSeq := uint64(ctx.BlockTime().Unix())
+				if sig.Sequence > midSeq+nonce_timestamp_tolerance_ms {
+					return ctx, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "timestamp too far in the future")
+				}
+				if sig.Sequence < midSeq-nonce_timestamp_tolerance_ms {
+					return ctx, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "timestamp too far in the past")
+				}
+				err := svd.ak.AddNonce(ctx, signer, sig.Sequence)
+				if err != nil {
+					return ctx, err
+				}
 			}
-			// Increment the sequence number.
-			if err := acc.SetSequence(acc.GetSequence() + 1); err != nil {
-				panic(err)
-			}
-			svd.ak.SetAccount(ctx, acc)
-		case SeqVal_GoodTilBlock:
-			// Ignore
-		case SeqVal_XOperate:
-			midSeq := uint64(ctx.BlockTime().Unix())
-			if sig.Sequence > midSeq+60_000 {
-				return ctx, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "timestamp too far in the future")
-			}
-			if sig.Sequence < midSeq-60_000 {
-				return ctx, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "timestamp too far in the past")
-			}
-			err := svd.ak.AddNonce(ctx, signer, sig.Sequence)
-			if err != nil {
-				return ctx, err
-			}
-		default:
-			return ctx, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "unknown sequence validation type")
 		}
 
 		// no need to verify signatures on recheck tx
