@@ -131,7 +131,10 @@ func ToRestingKey(
 	return b
 }
 
-func (order *XOrder) ToExpiryKey(priority uint64) []byte {
+func (order *XOrder) ToExpiryKeyOrNil(priority uint64) []byte {
+	if !order.Base.HasGoodTilTime() {
+		return nil
+	}
 	b := make([]byte, 12)
 	binary.BigEndian.PutUint32(b, order.Base.MustGetGoodTilTime())
 	binary.BigEndian.PutUint64(b[4:], priority)
@@ -140,12 +143,21 @@ func (order *XOrder) ToExpiryKey(priority uint64) []byte {
 
 // Priority
 
+// GetPriority returns a deterministic priority for the order.
+// The priority is:
+// - used to determine the order in which orders of the same price are matched or triggered
+// - intended to be "fair" (averaging over a long period) between any two accounts on any orderbook
+// - intended to be minimally-gameable by the client (i.e. not allow a better priority to be "mined" via clientId)
+//   - the priority can be influenced by the clientId only in the least-significant 32 bits
+//
+// - must be deterministic so that keys that include the priority can be found when canceling the order
+// - must be difficult to predict so that it is hard to front-run an order using an order of the same priority
 func (order *XOrder) GetPriority() uint64 {
 	b := make([]byte, 20)
 	binary.BigEndian.PutUint64(b, order.Uid.Sid)
 	binary.BigEndian.PutUint32(b[8:], order.Uid.Iid.ClobId)
 	binary.BigEndian.PutUint64(b[12:], order.Base.Subticks)
-	return xxhash.Sum64(b)
+	return xxhash.Sum64(b) + uint64(order.Uid.Iid.ClientId)
 }
 
 // Side

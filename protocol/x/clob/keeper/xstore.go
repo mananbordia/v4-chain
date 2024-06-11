@@ -65,20 +65,20 @@ func (k Keeper) TriggerOrder(
 
 	// Remove the order from the stop store.
 	stopStore := k.GetXStopStore(ctx)
-	key := order.ToStopKey(priority)
-	if !stopStore.Has(key) {
+	stopKey := order.ToStopKey(priority)
+	if !stopStore.Has(stopKey) {
 		return 0, 0, fmt.Errorf("order not found in stop store")
 	}
-	stopStore.Delete(key)
+	stopStore.Delete(stopKey)
 
 	// Remove the order from the expiry store.
-	if order.Base.HasGoodTilTime() {
+	expiryKey := order.ToExpiryKeyOrNil(priority)
+	if expiryKey != nil {
 		expiryStore := k.GetXExpiryStore(ctx)
-		key = order.ToExpiryKey(priority)
-		if !expiryStore.Has(key) {
-			panic(fmt.Errorf("expiry does not exist with key %s", key))
+		if !expiryStore.Has(expiryKey) {
+			panic(fmt.Errorf("expiry does not exist with key %s", expiryKey))
 		}
-		expiryStore.Delete(key)
+		expiryStore.Delete(expiryKey)
 	}
 
 	// Remove the order from the order store.
@@ -158,7 +158,7 @@ func (k Keeper) ProcessOrder(
 
 	// Stop orders: Put it in state and let it trigger later. Return.
 	if order.Base.IsStop() {
-		err := k.AddOrderToState(ctx, order)
+		err := k.AddOrderToState(ctx, order, true)
 		if err != nil {
 			return 0, 0, err
 		}
@@ -291,10 +291,10 @@ func (k Keeper) ProcessLiveOrder(ctx sdk.Context, order types.XOrder) (
 		sizeRem = 0
 	}
 
-	// If there is remaining size, attempt to place the order on the book.
+	// If there is remaining size, attempt to place the order as a resting order.
 	if sizeRem > 0 {
 		order.Base.Quantums = sizeRem
-		err := k.AddOrderToState(ctx, order)
+		err := k.AddOrderToState(ctx, order, false)
 		if err != nil {
 			return sizeSum, 0, err
 		}
@@ -337,9 +337,9 @@ func (k Keeper) RemoveOrderById(
 	}
 
 	// Remove expiry.
-	if order.Base.HasGoodTilTime() {
+	expiryKey := order.ToExpiryKeyOrNil(priority)
+	if expiryKey != nil {
 		expiryStore := k.GetXExpiryStore(ctx)
-		expiryKey := order.ToExpiryKey(priority)
 		if !expiryStore.Has(expiryKey) {
 			panic(fmt.Errorf("expiry does not exist with key %s", expiryKey))
 		}
@@ -352,47 +352,55 @@ func (k Keeper) RemoveOrderById(
 func (k Keeper) AddOrderToState(
 	ctx sdk.Context,
 	order types.XOrder,
+	asUntriggeredStop bool,
 ) error {
-	var store prefix.Store
-	var key []byte
+	if asUntriggeredStop && !order.Base.IsStop() {
+		panic(fmt.Errorf("order is not a stop order"))
+	}
+
 	// Precompute these values which may be used multiple times.
+
 	priority := order.GetPriority()
 	uidBytes := order.Uid.ToBytes()
 
-	// Store order by id.
-	store = k.GetXOrderStore(ctx)
-	key = uidBytes
-	if store.Has(key) {
-		return fmt.Errorf("order already exists with key %s", key)
+	// Ensure key does not already exist in the order store or the expiry store (if applicable).
+	orderStore := k.GetXOrderStore(ctx)
+	orderKey := uidBytes
+	if orderStore.Has(orderKey) {
+		return fmt.Errorf("order already exists with key %s", orderKey)
 	}
-	store.Set(key, k.cdc.MustMarshal(&order))
-
-	// Store resting or stop.
-	if order.Base.IsStop() {
-		store = k.GetXStopStore(ctx)
-		key = order.ToStopKey(priority)
-		if store.Has(key) {
-			return fmt.Errorf("order already exists with key %s", key)
+	var expiryStore prefix.Store
+	expiryKeyOrNil := order.ToExpiryKeyOrNil(priority)
+	if expiryKeyOrNil != nil {
+		expiryStore = k.GetXExpiryStore(ctx)
+		if expiryStore.Has(expiryKeyOrNil) {
+			return fmt.Errorf("order already exists with key %s", expiryKeyOrNil)
 		}
-		store.Set(key, uidBytes)
+	}
+
+	// Ensure key does not exist in the stop/resting store (as applicable).
+	// If it does not exist in this store, then start adding it to state.
+	if asUntriggeredStop {
+		stopStore := k.GetXStopStore(ctx)
+		stopKey := order.ToStopKey(priority)
+		if stopStore.Has(stopKey) {
+			return fmt.Errorf("order already exists with key %s", stopKey)
+		}
+		stopStore.Set(stopKey, uidBytes)
 	} else {
-		store = k.GetXRestingStore(ctx)
-		key = order.ToRestingKey(priority)
-		if store.Has(key) {
-			return fmt.Errorf("order already exists with key %s", key)
+		restingStore := k.GetXRestingStore(ctx)
+		restingKey := order.ToRestingKey(priority)
+		if restingStore.Has(restingKey) {
+			return fmt.Errorf("order already exists with key %s", restingKey)
 		}
-		store.Set(key, uidBytes)
+		restingStore.Set(restingKey, uidBytes)
 	}
 
-	// Store expiry.
-	if order.Base.HasGoodTilTime() {
-		store = k.GetXExpiryStore(ctx)
-		key = order.ToExpiryKey(priority)
-		if store.Has(key) {
-			return fmt.Errorf("order already exists with key %s", key)
-		}
-		store.Set(key, uidBytes)
+	// Finish add the order to state.
+	if expiryKeyOrNil != nil {
+		expiryStore.Set(expiryKeyOrNil, uidBytes)
 	}
+	orderStore.Set(orderKey, k.cdc.MustMarshal(&order))
 
 	return nil
 }
