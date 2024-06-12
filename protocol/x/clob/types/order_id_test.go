@@ -161,12 +161,9 @@ func TestSortOrders(t *testing.T) {
 
 func TestMustSortAndHaveNoDuplicates_Panic(t *testing.T) {
 	// duplicates should panic
-	require.PanicsWithError(
+	require.PanicsWithErrorf(
 		t,
-		fmt.Sprintf(
-			"cannot sort orders with duplicate order id %+v",
-			constants.Order_Alice_Num0_Id1_Clob0_Sell10_Price15_GTB15.OrderId,
-		),
+		"cannot sort orders with duplicate order id",
 		func() {
 			orders := []types.OrderId{
 				constants.Order_Alice_Num0_Id1_Clob0_Sell10_Price15_GTB15.OrderId,
