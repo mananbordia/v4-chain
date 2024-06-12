@@ -77,7 +77,7 @@ fetch(`${baseURL}/addresses/{address}`,
   "subaccounts": [
     {
       "address": "string",
-      "subaccountNumber": 0.1,
+      "subaccountNumber": 0,
       "equity": "string",
       "freeCollateral": "string",
       "openPerpetualPositions": {
@@ -97,7 +97,7 @@ fetch(`${baseURL}/addresses/{address}`,
           "unrealizedPnl": "string",
           "closedAt": null,
           "exitPrice": "string",
-          "subaccountNumber": 0.1
+          "subaccountNumber": 0
         },
         "property2": {
           "market": "string",
@@ -115,7 +115,7 @@ fetch(`${baseURL}/addresses/{address}`,
           "unrealizedPnl": "string",
           "closedAt": null,
           "exitPrice": "string",
-          "subaccountNumber": 0.1
+          "subaccountNumber": 0
         }
       },
       "assetPositions": {
@@ -124,14 +124,14 @@ fetch(`${baseURL}/addresses/{address}`,
           "side": "LONG",
           "size": "string",
           "assetId": "string",
-          "subaccountNumber": 0.1
+          "subaccountNumber": 0
         },
         "property2": {
           "symbol": "string",
           "side": "LONG",
           "size": "string",
           "assetId": "string",
-          "subaccountNumber": 0.1
+          "subaccountNumber": 0
         }
       },
       "marginEnabled": true,
@@ -214,7 +214,7 @@ fetch(`${baseURL}/addresses/{address}/subaccountNumber/{subaccountNumber}`,
 ```json
 {
   "address": "string",
-  "subaccountNumber": 0.1,
+  "subaccountNumber": 0,
   "equity": "string",
   "freeCollateral": "string",
   "openPerpetualPositions": {
@@ -234,7 +234,7 @@ fetch(`${baseURL}/addresses/{address}/subaccountNumber/{subaccountNumber}`,
       "unrealizedPnl": "string",
       "closedAt": "string",
       "exitPrice": "string",
-      "subaccountNumber": 0.1
+      "subaccountNumber": 0
     },
     "property2": {
       "market": "string",
@@ -252,7 +252,7 @@ fetch(`${baseURL}/addresses/{address}/subaccountNumber/{subaccountNumber}`,
       "unrealizedPnl": "string",
       "closedAt": "string",
       "exitPrice": "string",
-      "subaccountNumber": 0.1
+      "subaccountNumber": 0
     }
   },
   "assetPositions": {
@@ -261,14 +261,14 @@ fetch(`${baseURL}/addresses/{address}/subaccountNumber/{subaccountNumber}`,
       "side": "LONG",
       "size": "string",
       "assetId": "string",
-      "subaccountNumber": 0.1
+      "subaccountNumber": 0
     },
     "property2": {
       "symbol": "string",
       "side": "LONG",
       "size": "string",
       "assetId": "string",
-      "subaccountNumber": 0.1
+      "subaccountNumber": 0
     }
   },
   "marginEnabled": true,
@@ -348,13 +348,13 @@ fetch(`${baseURL}/addresses/{address}/parentSubaccountNumber/{parentSubaccountNu
 ```json
 {
   "address": "string",
-  "parentSubaccountNumber": 0.1,
+  "parentSubaccountNumber": 0,
   "equity": "string",
   "freeCollateral": "string",
   "childSubaccounts": [
     {
       "address": "string",
-      "subaccountNumber": 0.1,
+      "subaccountNumber": 0,
       "equity": "string",
       "freeCollateral": "string",
       "openPerpetualPositions": {
@@ -374,7 +374,7 @@ fetch(`${baseURL}/addresses/{address}/parentSubaccountNumber/{parentSubaccountNu
           "unrealizedPnl": "string",
           "closedAt": null,
           "exitPrice": "string",
-          "subaccountNumber": 0.1
+          "subaccountNumber": 0
         },
         "property2": {
           "market": "string",
@@ -392,7 +392,7 @@ fetch(`${baseURL}/addresses/{address}/parentSubaccountNumber/{parentSubaccountNu
           "unrealizedPnl": "string",
           "closedAt": null,
           "exitPrice": "string",
-          "subaccountNumber": 0.1
+          "subaccountNumber": 0
         }
       },
       "assetPositions": {
@@ -401,14 +401,14 @@ fetch(`${baseURL}/addresses/{address}/parentSubaccountNumber/{parentSubaccountNu
           "side": "LONG",
           "size": "string",
           "assetId": "string",
-          "subaccountNumber": 0.1
+          "subaccountNumber": 0
         },
         "property2": {
           "symbol": "string",
           "side": "LONG",
           "size": "string",
           "assetId": "string",
-          "subaccountNumber": 0.1
+          "subaccountNumber": 0
         }
       },
       "marginEnabled": true,
@@ -497,7 +497,7 @@ fetch(`${baseURL}/assetPositions?address=string&subaccountNumber=0.1`,
       "side": "LONG",
       "size": "string",
       "assetId": "string",
-      "subaccountNumber": 0.1
+      "subaccountNumber": 0
     }
   ]
 }
@@ -582,7 +582,7 @@ fetch(`${baseURL}/assetPositions/parentSubaccountNumber?address=string&parentSub
       "side": "LONG",
       "size": "string",
       "assetId": "string",
-      "subaccountNumber": 0.1
+      "subaccountNumber": 0
     }
   ]
 }
@@ -857,9 +857,9 @@ fetch(`${baseURL}/fills?address=string&subaccountNumber=0.1`,
 
 ```json
 {
-  "pageSize": 0.1,
-  "totalResults": 0.1,
-  "offset": 0.1,
+  "pageSize": 0,
+  "totalResults": 0,
+  "offset": 0,
   "fills": [
     {
       "id": "string",
@@ -875,7 +875,7 @@ fetch(`${baseURL}/fills?address=string&subaccountNumber=0.1`,
       "createdAtHeight": "string",
       "orderId": "string",
       "clientMetadata": "string",
-      "subaccountNumber": 0.1
+      "subaccountNumber": 0
     }
   ]
 }
@@ -967,9 +967,9 @@ fetch(`${baseURL}/fills/parentSubaccount?address=string&parentSubaccountNumber=0
 
 ```json
 {
-  "pageSize": 0.1,
-  "totalResults": 0.1,
-  "offset": 0.1,
+  "pageSize": 0,
+  "totalResults": 0,
+  "offset": 0,
   "fills": [
     {
       "id": "string",
@@ -985,7 +985,7 @@ fetch(`${baseURL}/fills/parentSubaccount?address=string&parentSubaccountNumber=0
       "createdAtHeight": "string",
       "orderId": "string",
       "clientMetadata": "string",
-      "subaccountNumber": 0.1
+      "subaccountNumber": 0
     }
   ]
 }
@@ -1307,9 +1307,9 @@ fetch(`${baseURL}/historical-pnl?address=string&subaccountNumber=0.1`,
 
 ```json
 {
-  "pageSize": 0.1,
-  "totalResults": 0.1,
-  "offset": 0.1,
+  "pageSize": 0,
+  "totalResults": 0,
+  "offset": 0,
   "historicalPnl": [
     {
       "id": "string",
@@ -1404,9 +1404,9 @@ fetch(`${baseURL}/historical-pnl/parentSubaccount?address=string&parentSubaccoun
 
 ```json
 {
-  "pageSize": 0.1,
-  "totalResults": 0.1,
-  "offset": 0.1,
+  "pageSize": 0,
+  "totalResults": 0,
+  "offset": 0,
   "historicalPnl": [
     {
       "id": "string",
@@ -1692,6 +1692,9 @@ fetch(`${baseURL}/orders?address=string&subaccountNumber=0.1`,
 |type|TRAILING_STOP|
 |type|TAKE_PROFIT|
 |type|TAKE_PROFIT_MARKET|
+|type|HARD_TRADE|
+|type|FAILED_HARD_TRADE|
+|type|TRANSFER_PLACEHOLDER|
 
 > Example responses
 
@@ -1722,7 +1725,7 @@ fetch(`${baseURL}/orders?address=string&subaccountNumber=0.1`,
     "ticker": "string",
     "updatedAt": "string",
     "updatedAtHeight": "string",
-    "subaccountNumber": 0.1
+    "subaccountNumber": 0
   }
 ]
 ```
@@ -1779,7 +1782,7 @@ Status Code **200**
 |» ticker|string|true|none|none|
 |» updatedAt|[IsoString](#schemaisostring)|false|none|none|
 |» updatedAtHeight|string|false|none|none|
-|» subaccountNumber|number(double)|true|none|none|
+|» subaccountNumber|integer(int32)|true|none|none|
 
 #### Enumerated Values
 
@@ -1794,6 +1797,9 @@ Status Code **200**
 |type|TRAILING_STOP|
 |type|TAKE_PROFIT|
 |type|TAKE_PROFIT_MARKET|
+|type|HARD_TRADE|
+|type|FAILED_HARD_TRADE|
+|type|TRANSFER_PLACEHOLDER|
 |timeInForce|GTT|
 |timeInForce|FOK|
 |timeInForce|IOC|
@@ -1886,6 +1892,9 @@ fetch(`${baseURL}/orders/parentSubaccountNumber?address=string&parentSubaccountN
 |type|TRAILING_STOP|
 |type|TAKE_PROFIT|
 |type|TAKE_PROFIT_MARKET|
+|type|HARD_TRADE|
+|type|FAILED_HARD_TRADE|
+|type|TRANSFER_PLACEHOLDER|
 
 > Example responses
 
@@ -1916,7 +1925,7 @@ fetch(`${baseURL}/orders/parentSubaccountNumber?address=string&parentSubaccountN
     "ticker": "string",
     "updatedAt": "string",
     "updatedAtHeight": "string",
-    "subaccountNumber": 0.1
+    "subaccountNumber": 0
   }
 ]
 ```
@@ -1973,7 +1982,7 @@ Status Code **200**
 |» ticker|string|true|none|none|
 |» updatedAt|[IsoString](#schemaisostring)|false|none|none|
 |» updatedAtHeight|string|false|none|none|
-|» subaccountNumber|number(double)|true|none|none|
+|» subaccountNumber|integer(int32)|true|none|none|
 
 #### Enumerated Values
 
@@ -1988,6 +1997,9 @@ Status Code **200**
 |type|TRAILING_STOP|
 |type|TAKE_PROFIT|
 |type|TAKE_PROFIT_MARKET|
+|type|HARD_TRADE|
+|type|FAILED_HARD_TRADE|
+|type|TRANSFER_PLACEHOLDER|
 |timeInForce|GTT|
 |timeInForce|FOK|
 |timeInForce|IOC|
@@ -2084,7 +2096,7 @@ fetch(`${baseURL}/orders/{orderId}`,
   "ticker": "string",
   "updatedAt": "string",
   "updatedAtHeight": "string",
-  "subaccountNumber": 0.1
+  "subaccountNumber": 0
 }
 ```
 
@@ -2167,17 +2179,17 @@ fetch(`${baseURL}/perpetualMarkets`,
       "oraclePrice": "string",
       "priceChange24H": "string",
       "volume24H": "string",
-      "trades24H": 0.1,
+      "trades24H": 0,
       "nextFundingRate": "string",
       "initialMarginFraction": "string",
       "maintenanceMarginFraction": "string",
       "openInterest": "string",
-      "atomicResolution": 0.1,
-      "quantumConversionExponent": 0.1,
+      "atomicResolution": 0,
+      "quantumConversionExponent": 0,
       "tickSize": "string",
       "stepSize": "string",
-      "stepBaseQuantums": 0.1,
-      "subticksPerTick": 0.1,
+      "stepBaseQuantums": 0,
+      "subticksPerTick": 0,
       "marketType": "CROSS",
       "openInterestLowerCap": "string",
       "openInterestUpperCap": "string",
@@ -2190,17 +2202,17 @@ fetch(`${baseURL}/perpetualMarkets`,
       "oraclePrice": "string",
       "priceChange24H": "string",
       "volume24H": "string",
-      "trades24H": 0.1,
+      "trades24H": 0,
       "nextFundingRate": "string",
       "initialMarginFraction": "string",
       "maintenanceMarginFraction": "string",
       "openInterest": "string",
-      "atomicResolution": 0.1,
-      "quantumConversionExponent": 0.1,
+      "atomicResolution": 0,
+      "quantumConversionExponent": 0,
       "tickSize": "string",
       "stepSize": "string",
-      "stepBaseQuantums": 0.1,
-      "subticksPerTick": 0.1,
+      "stepBaseQuantums": 0,
+      "subticksPerTick": 0,
       "marketType": "CROSS",
       "openInterestLowerCap": "string",
       "openInterestUpperCap": "string",
@@ -2312,7 +2324,7 @@ fetch(`${baseURL}/perpetualPositions?address=string&subaccountNumber=0.1`,
       "unrealizedPnl": "string",
       "closedAt": "string",
       "exitPrice": "string",
-      "subaccountNumber": 0.1
+      "subaccountNumber": 0
     }
   ]
 }
@@ -2420,7 +2432,7 @@ fetch(`${baseURL}/perpetualPositions/parentSubaccountNumber?address=string&paren
       "unrealizedPnl": "string",
       "closedAt": "string",
       "exitPrice": "string",
-      "subaccountNumber": 0.1
+      "subaccountNumber": 0
     }
   ]
 }
@@ -2657,9 +2669,9 @@ fetch(`${baseURL}/trades/perpetualMarket/{ticker}`,
 
 ```json
 {
-  "pageSize": 0.1,
-  "totalResults": 0.1,
-  "offset": 0.1,
+  "pageSize": 0,
+  "totalResults": 0,
+  "offset": 0,
   "trades": [
     {
       "id": "string",
@@ -2751,18 +2763,18 @@ fetch(`${baseURL}/transfers?address=string&subaccountNumber=0.1`,
 
 ```json
 {
-  "pageSize": 0.1,
-  "totalResults": 0.1,
-  "offset": 0.1,
+  "pageSize": 0,
+  "totalResults": 0,
+  "offset": 0,
   "transfers": [
     {
       "id": "string",
       "sender": {
-        "subaccountNumber": 0.1,
+        "subaccountNumber": 0,
         "address": "string"
       },
       "recipient": {
-        "subaccountNumber": 0.1,
+        "subaccountNumber": 0,
         "address": "string"
       },
       "size": "string",
@@ -2853,18 +2865,18 @@ fetch(`${baseURL}/transfers/parentSubaccountNumber?address=string&parentSubaccou
 
 ```json
 {
-  "pageSize": 0.1,
-  "totalResults": 0.1,
-  "offset": 0.1,
+  "pageSize": 0,
+  "totalResults": 0,
+  "offset": 0,
   "transfers": [
     {
       "id": "string",
       "sender": {
-        "subaccountNumber": 0.1,
+        "subaccountNumber": 0,
         "address": "string"
       },
       "recipient": {
-        "subaccountNumber": 0.1,
+        "subaccountNumber": 0,
         "address": "string"
       },
       "size": "string",
@@ -2983,7 +2995,7 @@ This operation does not require authentication
   "unrealizedPnl": "string",
   "closedAt": "string",
   "exitPrice": "string",
-  "subaccountNumber": 0.1
+  "subaccountNumber": 0
 }
 
 ```
@@ -3007,7 +3019,7 @@ This operation does not require authentication
 |unrealizedPnl|string|true|none|none|
 |closedAt|[IsoString](#schemaisostring)¦null|false|none|none|
 |exitPrice|string¦null|false|none|none|
-|subaccountNumber|number(double)|true|none|none|
+|subaccountNumber|integer(int32)|true|none|none|
 
 ## PerpetualPositionsMap
 
@@ -3034,7 +3046,7 @@ This operation does not require authentication
     "unrealizedPnl": "string",
     "closedAt": "string",
     "exitPrice": "string",
-    "subaccountNumber": 0.1
+    "subaccountNumber": 0
   },
   "property2": {
     "market": "string",
@@ -3052,7 +3064,7 @@ This operation does not require authentication
     "unrealizedPnl": "string",
     "closedAt": "string",
     "exitPrice": "string",
-    "subaccountNumber": 0.1
+    "subaccountNumber": 0
   }
 }
 
@@ -3077,7 +3089,7 @@ This operation does not require authentication
   "side": "LONG",
   "size": "string",
   "assetId": "string",
-  "subaccountNumber": 0.1
+  "subaccountNumber": 0
 }
 
 ```
@@ -3090,7 +3102,7 @@ This operation does not require authentication
 |side|[PositionSide](#schemapositionside)|true|none|none|
 |size|string|true|none|none|
 |assetId|string|true|none|none|
-|subaccountNumber|number(double)|true|none|none|
+|subaccountNumber|integer(int32)|true|none|none|
 
 ## AssetPositionsMap
 
@@ -3106,14 +3118,14 @@ This operation does not require authentication
     "side": "LONG",
     "size": "string",
     "assetId": "string",
-    "subaccountNumber": 0.1
+    "subaccountNumber": 0
   },
   "property2": {
     "symbol": "string",
     "side": "LONG",
     "size": "string",
     "assetId": "string",
-    "subaccountNumber": 0.1
+    "subaccountNumber": 0
   }
 }
 
@@ -3135,7 +3147,7 @@ This operation does not require authentication
 ```json
 {
   "address": "string",
-  "subaccountNumber": 0.1,
+  "subaccountNumber": 0,
   "equity": "string",
   "freeCollateral": "string",
   "openPerpetualPositions": {
@@ -3155,7 +3167,7 @@ This operation does not require authentication
       "unrealizedPnl": "string",
       "closedAt": "string",
       "exitPrice": "string",
-      "subaccountNumber": 0.1
+      "subaccountNumber": 0
     },
     "property2": {
       "market": "string",
@@ -3173,7 +3185,7 @@ This operation does not require authentication
       "unrealizedPnl": "string",
       "closedAt": "string",
       "exitPrice": "string",
-      "subaccountNumber": 0.1
+      "subaccountNumber": 0
     }
   },
   "assetPositions": {
@@ -3182,14 +3194,14 @@ This operation does not require authentication
       "side": "LONG",
       "size": "string",
       "assetId": "string",
-      "subaccountNumber": 0.1
+      "subaccountNumber": 0
     },
     "property2": {
       "symbol": "string",
       "side": "LONG",
       "size": "string",
       "assetId": "string",
-      "subaccountNumber": 0.1
+      "subaccountNumber": 0
     }
   },
   "marginEnabled": true,
@@ -3203,7 +3215,7 @@ This operation does not require authentication
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |address|string|true|none|none|
-|subaccountNumber|number(double)|true|none|none|
+|subaccountNumber|integer(int32)|true|none|none|
 |equity|string|true|none|none|
 |freeCollateral|string|true|none|none|
 |openPerpetualPositions|[PerpetualPositionsMap](#schemaperpetualpositionsmap)|true|none|none|
@@ -3223,7 +3235,7 @@ This operation does not require authentication
   "subaccounts": [
     {
       "address": "string",
-      "subaccountNumber": 0.1,
+      "subaccountNumber": 0,
       "equity": "string",
       "freeCollateral": "string",
       "openPerpetualPositions": {
@@ -3243,7 +3255,7 @@ This operation does not require authentication
           "unrealizedPnl": "string",
           "closedAt": null,
           "exitPrice": "string",
-          "subaccountNumber": 0.1
+          "subaccountNumber": 0
         },
         "property2": {
           "market": "string",
@@ -3261,7 +3273,7 @@ This operation does not require authentication
           "unrealizedPnl": "string",
           "closedAt": null,
           "exitPrice": "string",
-          "subaccountNumber": 0.1
+          "subaccountNumber": 0
         }
       },
       "assetPositions": {
@@ -3270,14 +3282,14 @@ This operation does not require authentication
           "side": "LONG",
           "size": "string",
           "assetId": "string",
-          "subaccountNumber": 0.1
+          "subaccountNumber": 0
         },
         "property2": {
           "symbol": "string",
           "side": "LONG",
           "size": "string",
           "assetId": "string",
-          "subaccountNumber": 0.1
+          "subaccountNumber": 0
         }
       },
       "marginEnabled": true,
@@ -3306,13 +3318,13 @@ This operation does not require authentication
 ```json
 {
   "address": "string",
-  "parentSubaccountNumber": 0.1,
+  "parentSubaccountNumber": 0,
   "equity": "string",
   "freeCollateral": "string",
   "childSubaccounts": [
     {
       "address": "string",
-      "subaccountNumber": 0.1,
+      "subaccountNumber": 0,
       "equity": "string",
       "freeCollateral": "string",
       "openPerpetualPositions": {
@@ -3332,7 +3344,7 @@ This operation does not require authentication
           "unrealizedPnl": "string",
           "closedAt": null,
           "exitPrice": "string",
-          "subaccountNumber": 0.1
+          "subaccountNumber": 0
         },
         "property2": {
           "market": "string",
@@ -3350,7 +3362,7 @@ This operation does not require authentication
           "unrealizedPnl": "string",
           "closedAt": null,
           "exitPrice": "string",
-          "subaccountNumber": 0.1
+          "subaccountNumber": 0
         }
       },
       "assetPositions": {
@@ -3359,14 +3371,14 @@ This operation does not require authentication
           "side": "LONG",
           "size": "string",
           "assetId": "string",
-          "subaccountNumber": 0.1
+          "subaccountNumber": 0
         },
         "property2": {
           "symbol": "string",
           "side": "LONG",
           "size": "string",
           "assetId": "string",
-          "subaccountNumber": 0.1
+          "subaccountNumber": 0
         }
       },
       "marginEnabled": true,
@@ -3382,7 +3394,7 @@ This operation does not require authentication
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |address|string|true|none|none|
-|parentSubaccountNumber|number(double)|true|none|none|
+|parentSubaccountNumber|integer(int32)|true|none|none|
 |equity|string|true|none|none|
 |freeCollateral|string|true|none|none|
 |childSubaccounts|[[SubaccountResponseObject](#schemasubaccountresponseobject)]|true|none|none|
@@ -3402,7 +3414,7 @@ This operation does not require authentication
       "side": "LONG",
       "size": "string",
       "assetId": "string",
-      "subaccountNumber": 0.1
+      "subaccountNumber": 0
     }
   ]
 }
@@ -3727,7 +3739,7 @@ This operation does not require authentication
   "createdAtHeight": "string",
   "orderId": "string",
   "clientMetadata": "string",
-  "subaccountNumber": 0.1
+  "subaccountNumber": 0
 }
 
 ```
@@ -3749,7 +3761,7 @@ This operation does not require authentication
 |createdAtHeight|string|true|none|none|
 |orderId|string|false|none|none|
 |clientMetadata|string|false|none|none|
-|subaccountNumber|number(double)|true|none|none|
+|subaccountNumber|integer(int32)|true|none|none|
 
 ## FillResponse
 
@@ -3760,9 +3772,9 @@ This operation does not require authentication
 
 ```json
 {
-  "pageSize": 0.1,
-  "totalResults": 0.1,
-  "offset": 0.1,
+  "pageSize": 0,
+  "totalResults": 0,
+  "offset": 0,
   "fills": [
     {
       "id": "string",
@@ -3778,7 +3790,7 @@ This operation does not require authentication
       "createdAtHeight": "string",
       "orderId": "string",
       "clientMetadata": "string",
-      "subaccountNumber": 0.1
+      "subaccountNumber": 0
     }
   ]
 }
@@ -3789,9 +3801,9 @@ This operation does not require authentication
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|pageSize|number(double)|false|none|none|
-|totalResults|number(double)|false|none|none|
-|offset|number(double)|false|none|none|
+|pageSize|integer(int32)|false|none|none|
+|totalResults|integer(int32)|false|none|none|
+|offset|integer(int32)|false|none|none|
 |fills|[[FillResponseObject](#schemafillresponseobject)]|true|none|none|
 
 ## HeightResponse
@@ -3965,9 +3977,9 @@ This operation does not require authentication
 
 ```json
 {
-  "pageSize": 0.1,
-  "totalResults": 0.1,
-  "offset": 0.1,
+  "pageSize": 0,
+  "totalResults": 0,
+  "offset": 0,
   "historicalPnl": [
     {
       "id": "string",
@@ -3988,9 +4000,9 @@ This operation does not require authentication
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|pageSize|number(double)|false|none|none|
-|totalResults|number(double)|false|none|none|
-|offset|number(double)|false|none|none|
+|pageSize|integer(int32)|false|none|none|
+|totalResults|integer(int32)|false|none|none|
+|offset|integer(int32)|false|none|none|
 |historicalPnl|[[PnlTicksResponseObject](#schemapnlticksresponseobject)]|true|none|none|
 
 ## TradingRewardAggregationPeriod
@@ -4265,6 +4277,9 @@ or
 |*anonymous*|TRAILING_STOP|
 |*anonymous*|TAKE_PROFIT|
 |*anonymous*|TAKE_PROFIT_MARKET|
+|*anonymous*|HARD_TRADE|
+|*anonymous*|FAILED_HARD_TRADE|
+|*anonymous*|TRANSFER_PLACEHOLDER|
 
 ## OrderResponseObject
 
@@ -4297,7 +4312,7 @@ or
   "ticker": "string",
   "updatedAt": "string",
   "updatedAtHeight": "string",
-  "subaccountNumber": 0.1
+  "subaccountNumber": 0
 }
 
 ```
@@ -4328,7 +4343,7 @@ or
 |ticker|string|true|none|none|
 |updatedAt|[IsoString](#schemaisostring)|false|none|none|
 |updatedAtHeight|string|false|none|none|
-|subaccountNumber|number(double)|true|none|none|
+|subaccountNumber|integer(int32)|true|none|none|
 
 ## PerpetualMarketStatus
 
@@ -4399,17 +4414,17 @@ or
   "oraclePrice": "string",
   "priceChange24H": "string",
   "volume24H": "string",
-  "trades24H": 0.1,
+  "trades24H": 0,
   "nextFundingRate": "string",
   "initialMarginFraction": "string",
   "maintenanceMarginFraction": "string",
   "openInterest": "string",
-  "atomicResolution": 0.1,
-  "quantumConversionExponent": 0.1,
+  "atomicResolution": 0,
+  "quantumConversionExponent": 0,
   "tickSize": "string",
   "stepSize": "string",
-  "stepBaseQuantums": 0.1,
-  "subticksPerTick": 0.1,
+  "stepBaseQuantums": 0,
+  "subticksPerTick": 0,
   "marketType": "CROSS",
   "openInterestLowerCap": "string",
   "openInterestUpperCap": "string",
@@ -4428,17 +4443,17 @@ or
 |oraclePrice|string|true|none|none|
 |priceChange24H|string|true|none|none|
 |volume24H|string|true|none|none|
-|trades24H|number(double)|true|none|none|
+|trades24H|integer(int32)|true|none|none|
 |nextFundingRate|string|true|none|none|
 |initialMarginFraction|string|true|none|none|
 |maintenanceMarginFraction|string|true|none|none|
 |openInterest|string|true|none|none|
-|atomicResolution|number(double)|true|none|none|
-|quantumConversionExponent|number(double)|true|none|none|
+|atomicResolution|integer(int32)|true|none|none|
+|quantumConversionExponent|integer(int32)|true|none|none|
 |tickSize|string|true|none|none|
 |stepSize|string|true|none|none|
-|stepBaseQuantums|number(double)|true|none|none|
-|subticksPerTick|number(double)|true|none|none|
+|stepBaseQuantums|integer(int32)|true|none|none|
+|subticksPerTick|integer(int32)|true|none|none|
 |marketType|[PerpetualMarketType](#schemaperpetualmarkettype)|true|none|none|
 |openInterestLowerCap|string|false|none|none|
 |openInterestUpperCap|string|false|none|none|
@@ -4461,17 +4476,17 @@ or
       "oraclePrice": "string",
       "priceChange24H": "string",
       "volume24H": "string",
-      "trades24H": 0.1,
+      "trades24H": 0,
       "nextFundingRate": "string",
       "initialMarginFraction": "string",
       "maintenanceMarginFraction": "string",
       "openInterest": "string",
-      "atomicResolution": 0.1,
-      "quantumConversionExponent": 0.1,
+      "atomicResolution": 0,
+      "quantumConversionExponent": 0,
       "tickSize": "string",
       "stepSize": "string",
-      "stepBaseQuantums": 0.1,
-      "subticksPerTick": 0.1,
+      "stepBaseQuantums": 0,
+      "subticksPerTick": 0,
       "marketType": "CROSS",
       "openInterestLowerCap": "string",
       "openInterestUpperCap": "string",
@@ -4484,17 +4499,17 @@ or
       "oraclePrice": "string",
       "priceChange24H": "string",
       "volume24H": "string",
-      "trades24H": 0.1,
+      "trades24H": 0,
       "nextFundingRate": "string",
       "initialMarginFraction": "string",
       "maintenanceMarginFraction": "string",
       "openInterest": "string",
-      "atomicResolution": 0.1,
-      "quantumConversionExponent": 0.1,
+      "atomicResolution": 0,
+      "quantumConversionExponent": 0,
       "tickSize": "string",
       "stepSize": "string",
-      "stepBaseQuantums": 0.1,
-      "subticksPerTick": 0.1,
+      "stepBaseQuantums": 0,
+      "subticksPerTick": 0,
       "marketType": "CROSS",
       "openInterestLowerCap": "string",
       "openInterestUpperCap": "string",
@@ -4538,7 +4553,7 @@ or
       "unrealizedPnl": "string",
       "closedAt": "string",
       "exitPrice": "string",
-      "subaccountNumber": 0.1
+      "subaccountNumber": 0
     }
   ]
 }
@@ -4690,9 +4705,9 @@ or
 
 ```json
 {
-  "pageSize": 0.1,
-  "totalResults": 0.1,
-  "offset": 0.1,
+  "pageSize": 0,
+  "totalResults": 0,
+  "offset": 0,
   "trades": [
     {
       "id": "string",
@@ -4712,9 +4727,9 @@ or
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|pageSize|number(double)|false|none|none|
-|totalResults|number(double)|false|none|none|
-|offset|number(double)|false|none|none|
+|pageSize|integer(int32)|false|none|none|
+|totalResults|integer(int32)|false|none|none|
+|offset|integer(int32)|false|none|none|
 |trades|[[TradeResponseObject](#schematraderesponseobject)]|true|none|none|
 
 ## TransferType
@@ -4755,11 +4770,11 @@ or
 {
   "id": "string",
   "sender": {
-    "subaccountNumber": 0.1,
+    "subaccountNumber": 0,
     "address": "string"
   },
   "recipient": {
-    "subaccountNumber": 0.1,
+    "subaccountNumber": 0,
     "address": "string"
   },
   "size": "string",
@@ -4778,10 +4793,10 @@ or
 |---|---|---|---|---|
 |id|string|true|none|none|
 |sender|object|true|none|none|
-|» subaccountNumber|number(double)|false|none|none|
+|» subaccountNumber|integer(int32)|false|none|none|
 |» address|string|true|none|none|
 |recipient|object|true|none|none|
-|» subaccountNumber|number(double)|false|none|none|
+|» subaccountNumber|integer(int32)|false|none|none|
 |» address|string|true|none|none|
 |size|string|true|none|none|
 |createdAt|string|true|none|none|
@@ -4799,18 +4814,18 @@ or
 
 ```json
 {
-  "pageSize": 0.1,
-  "totalResults": 0.1,
-  "offset": 0.1,
+  "pageSize": 0,
+  "totalResults": 0,
+  "offset": 0,
   "transfers": [
     {
       "id": "string",
       "sender": {
-        "subaccountNumber": 0.1,
+        "subaccountNumber": 0,
         "address": "string"
       },
       "recipient": {
-        "subaccountNumber": 0.1,
+        "subaccountNumber": 0,
         "address": "string"
       },
       "size": "string",
@@ -4829,9 +4844,9 @@ or
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|pageSize|number(double)|false|none|none|
-|totalResults|number(double)|false|none|none|
-|offset|number(double)|false|none|none|
+|pageSize|integer(int32)|false|none|none|
+|totalResults|integer(int32)|false|none|none|
+|offset|integer(int32)|false|none|none|
 |transfers|[[TransferResponseObject](#schematransferresponseobject)]|true|none|none|
 
 ## ParentSubaccountTransferResponse
@@ -4843,18 +4858,18 @@ or
 
 ```json
 {
-  "pageSize": 0.1,
-  "totalResults": 0.1,
-  "offset": 0.1,
+  "pageSize": 0,
+  "totalResults": 0,
+  "offset": 0,
   "transfers": [
     {
       "id": "string",
       "sender": {
-        "subaccountNumber": 0.1,
+        "subaccountNumber": 0,
         "address": "string"
       },
       "recipient": {
-        "subaccountNumber": 0.1,
+        "subaccountNumber": 0,
         "address": "string"
       },
       "size": "string",
@@ -4873,8 +4888,8 @@ or
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|pageSize|number(double)|false|none|none|
-|totalResults|number(double)|false|none|none|
-|offset|number(double)|false|none|none|
+|pageSize|integer(int32)|false|none|none|
+|totalResults|integer(int32)|false|none|none|
+|offset|integer(int32)|false|none|none|
 |transfers|[[TransferResponseObject](#schematransferresponseobject)]|true|none|none|
 
