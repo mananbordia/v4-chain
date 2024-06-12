@@ -213,12 +213,12 @@ func (k Keeper) getSettledUpdates(
 	updates []types.Update,
 	requireUniqueSubaccount bool,
 ) (
-	settledUpdates []SettledUpdate,
+	settledUpdates []types.SettledUpdate,
 	subaccountIdToFundingPayments map[types.SubaccountId]map[uint32]dtypes.SerializableInt,
 	err error,
 ) {
 	var idToSettledSubaccount = make(map[types.SubaccountId]types.Subaccount)
-	settledUpdates = make([]SettledUpdate, len(updates))
+	settledUpdates = make([]types.SettledUpdate, len(updates))
 	subaccountIdToFundingPayments = make(map[types.SubaccountId]map[uint32]dtypes.SerializableInt)
 
 	// Iterate over all updates and query the relevant `Subaccounts`.
@@ -243,7 +243,7 @@ func (k Keeper) getSettledUpdates(
 			subaccountIdToFundingPayments[u.SubaccountId] = fundingPayments
 		}
 
-		settledUpdate := SettledUpdate{
+		settledUpdate := types.SettledUpdate{
 			SettledSubaccount: settledSubaccount,
 			AssetUpdates:      u.AssetUpdates,
 			PerpetualUpdates:  u.PerpetualUpdates,
@@ -574,7 +574,7 @@ func checkPositionUpdatable(
 // caused a failure, if any.
 func (k Keeper) internalCanUpdateSubaccounts(
 	ctx sdk.Context,
-	settledUpdates []SettledUpdate,
+	settledUpdates []types.SettledUpdate,
 	updateType types.UpdateType,
 	perpetuals []perptypes.Perpetual,
 ) (
@@ -730,7 +730,7 @@ func (k Keeper) internalCanUpdateSubaccounts(
 		// We must now check if the state transition is valid.
 		if bigNewInitialMargin.Cmp(bigNewNetCollateral) > 0 {
 			// Get the current collateralization and margin requirements without the update applied.
-			emptyUpdate := SettledUpdate{
+			emptyUpdate := types.SettledUpdate{
 				SettledSubaccount: u.SettledSubaccount,
 			}
 
@@ -869,7 +869,7 @@ func (k Keeper) GetNetCollateralAndMarginRequirements(
 		return nil, nil, nil, err
 	}
 
-	settledUpdate := SettledUpdate{
+	settledUpdate := types.SettledUpdate{
 		SettledSubaccount: settledSubaccount,
 		AssetUpdates:      update.AssetUpdates,
 		PerpetualUpdates:  update.PerpetualUpdates,
@@ -894,7 +894,7 @@ func (k Keeper) GetNetCollateralAndMarginRequirements(
 // If two position updates reference the same position, an error is returned.
 func (k Keeper) internalGetNetCollateralAndMarginRequirements(
 	ctx sdk.Context,
-	settledUpdate SettledUpdate,
+	settledUpdate types.SettledUpdate,
 ) (
 	bigNetCollateral *big.Int,
 	bigInitialMargin *big.Int,
